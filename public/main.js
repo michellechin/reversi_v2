@@ -8,7 +8,7 @@ function getURLParameters(whichParam)
 	var pageURLVariables = pageURL.split('&');
 	for(var i=0; i<pageURLVariables.length; i++){
 		var paramaterName = pageURLVariables[i].split('=');
-		if (paramaterName[0] == whichParam) {
+		if (paramaterName[0] === whichParam) {
 			return paramaterName[1];
 		}
 	}
