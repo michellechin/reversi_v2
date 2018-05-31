@@ -243,19 +243,3 @@ $(function(){
 	console.log('*** Client Log Message: \'join_room\ payload: ' + JSON.stringify(payload));
 	socket.emit('join_room', payload);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
