@@ -95,13 +95,13 @@ socket.on('join_room_response', function(payload){ // Join room response
 
 socket.on('player_disconnected', function(payload){
 	
-	if (payload.result === 'fail'){
+	if (payload.result == 'fail'){
 		alert(payload.message);
 		return;
 	}
 	
 	// if were are being notified that we left the room, then ignore it
-	if (payload.socket_id === socket.id) {
+	if (payload.socket_id == socket.id) {
 		return;
 	}
 	
@@ -109,7 +109,7 @@ socket.on('player_disconnected', function(payload){
 	var dom_elements = $('.socket_'+payload.socket_id);
 	
 	// is something exists
-	if (dom_elements.length !== 0){
+	if (dom_elements.length != 0){
 		dom_elements.slideUp(1000);
 	}
 	
