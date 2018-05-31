@@ -94,10 +94,8 @@ socket.on('join_room_response', function(payload){ // Join room response
 // What to do when the server says someone has left a room
 
 socket.on('player_disconnected', function(payload){
-	console.log('*** Client Log Message: "disconnected" payload: '+JSON.stringify(payload));
 	
-	
-	if (payload.result === 'fail') {
+	if (payload.result === 'fail'){
 		alert(payload.message);
 		return;
 	}
@@ -119,7 +117,7 @@ socket.on('player_disconnected', function(payload){
 	var newHTML = '<p>'+payload.username+' has left the lobby</p>';
 	var newNode = $(newHTML);
 	newNode.hide();
-	$('#message').append(newNode);
+	$('#messages').append(newNode);
 	newNode.slideDown(1000);
 });
 
@@ -154,7 +152,7 @@ socket.on('player_disconnected', function(payload){ // Leave room response
 });
 */
 
-function invite(who) { // Inveite someone
+function invite(who) { // Invite someone
 	var payload = {};
 	payload.requested_user = who;
 	
