@@ -217,7 +217,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 		
-		var username = payload.username;
+		var username = players[socket.id].username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'send_message didn\'t specify a username, command aborted';
 			log(error_message);
