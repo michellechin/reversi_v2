@@ -179,7 +179,6 @@ io.sockets.on('connection', function(socket){
 	{
 	 
 	 	'room': room to join,
-	 	'username' : username of person sending the message,
 	 	'message' : the message to send
 	}
 	send_message_response: {
@@ -244,7 +243,7 @@ io.sockets.on('connection', function(socket){
 			username: username,
 			message: message
 		};
-		io.sockets.in(room).emit('send_message_response', success_data);
+		io.in(room).emit('send_message_response', success_data);
 		log('Message sent to room ' + room + ' by ' + username);
 	});
 	
@@ -271,7 +270,7 @@ io.sockets.on('connection', function(socket){
 		'result': 'success',
 		'socket_id' : failure message
 	}
-	14:45 on video	
+	11:15 on video	
 	*/
 	
 	socket.on('invite', function(payload){
@@ -343,6 +342,202 @@ io.sockets.on('connection', function(socket){
 		
 		log('invite successful');
 	});
+	
+	
+		/* uninvite command */
+	/* payload: 
+	{
+	 
+	 	'requested_user': the socket id of the person to be uninvited
+	}
+	uninvite_response: {
+		'result': 'success',
+		'socket_id' : the socket id of the person being uninvited
+	}
+	or {
+		'result': 'fail',
+		'message' : failure message
+	}
+	uninvited: {
+		'result': 'success',
+		'socket_id' : the socket id of the person doing the uninviting
+	}
+	or {
+		'result': 'success',
+		'socket_id' : failure message
+	}
+	05:30 on video	
+	*/
+	
+	socket.on('uninvite', function(payload){
+		log('uninvite with ' + JSON.stringify(payload));
+		
+		/* Check to make sure that a payload was sent */
+		if(('undefined' === typeof payload) || !payload){
+		   var error_message = 'uninvite had no payload, command aborted';
+			log(error_message);
+			socket.emit('uninvite_response', {
+				result:'fail',
+				message: error_message
+			});
+			return;
+		}		
+		
+		/* Check that the message can be traced to a username */
+		var username = players[socket.id].username;
+		if (('undefined' === typeof username) || !username) {
+			var error_message = 'uninvite can\'t identify who sent the message.';
+			log(error_message);
+			socket.emit('uninvite_response', {
+				result: 'fail',
+				message: error_message
+			});
+			return;
+		}
+
+		var requested_user = payload.requested_user;
+		if (('undefined' === typeof requested_user) || !requested_user) {
+			var error_message = 'uninvite didn\'t specify a requested_user, command aborted';
+			log(error_message);
+			socket.emit('uninvite_response', {
+				result: 'fail',
+				message: error_message
+			});
+			return;
+		}
+		
+		var room = players[socket.id].room;
+		var roomObject = io.sockets.adapter.rooms[room];
+		/* Make sure the user being invited is in the room */
+		
+		if (!roomObject.sockets.hasOwnProperty(requested_user)) {
+			var error_message = 'invite requested a user that wasn\'t in the room, command aborted';
+			log(error_message);
+			
+			/*should the below say uninvite_response or invite_response? */
+			socket.emit('uninvite_response', {
+				result: 'fail',
+				message: error_message
+			});
+			return;
+		}
+		
+		/* If everything is ok respond to the uninviter that it was successful */
+		
+		var success_data = {
+			result: 'success',
+			socket_id: requested_user
+		};
+		socket.emit('uninvite_response', success_data);
+
+		
+		/* Tell the uninvitee that they have been uninvited */
+		
+		var success_data = {
+			result: 'success',
+			socket_id: socket.id
+		};
+		socket.to(requested_user).emit('uninvited', success_data);
+		
+		log('uninvite successful');
+	});
+
+	
+			/* game_start command */
+	/* payload: 
+	{
+	 
+	 	'requested_user': the socket id of the person to play with
+	}
+	game_start_response: {
+		'result': 'success',
+		'socket_id' : the socket id of the person you are playing with
+		'game_id' : id of the game session
+
+	}
+	or {
+		'result': 'fail',
+		'message' : failure message
+	}
+	08:50 on video	
+	*/
+	
+	socket.on('game_start', function(payload){
+		log('game_start with ' + JSON.stringify(payload));
+		
+		/* Check to make sure that a payload was sent */
+		if(('undefined' === typeof payload) || !payload){
+		   var error_message = 'game_start had no payload, command aborted';
+			log(error_message);
+			socket.emit('game_start_response', {
+				result:'fail',
+				message: error_message
+			});
+			return;
+		}		
+		
+		/* Check that the message can be traced to a username */
+		var username = players[socket.id].username;
+		if (('undefined' === typeof username) || !username) {
+			var error_message = 'game_start can\'t identify who sent the message.';
+			log(error_message);
+			socket.emit('game_start_response', {
+				result: 'fail',
+				message: error_message
+			});
+			return;
+		}
+
+		var requested_user = payload.requested_user;
+		if (('undefined' === typeof requested_user) || !requested_user) {
+			var error_message = 'uninvite didn\'t specify a requested_user, command aborted';
+			log(error_message);
+			socket.emit('uninvite_response', {
+				result: 'fail',
+				message: error_message
+			});
+			return;
+		}
+		
+		var room = players[socket.id].room;
+		var roomObject = io.sockets.adapter.rooms[room];
+		
+		/* Make sure the user being invited is in the room */
+		if (!roomObject.sockets.hasOwnProperty(requested_user)) {
+			var error_message = 'game_start requested a user that wasn\'t in the room, command aborted';
+			log(error_message);
+			socket.emit('game_start_response', {
+				result: 'fail',
+				message: error_message
+			});
+			return;
+		}
+		
+		/* If everything is ok respond to the game starter that it was successful */
+       /*var game_id = Math.floor((1+Math.random()) * 0x10000.toString(16).substring(1)); */
+		var game_id = Math.floor(1+Math.random() * 0x1000.toString(16).substring());
+		var success_data = {
+			result: 'success',
+			socket_id: requested_user,
+			game_id: game_id
+		};
+		socket.emit('game_start_response', success_data);
+
+		
+		/* Tell the other player to play */
+		
+		var success_data = {
+			result: 'success',
+			socket_id: socket.id,
+			game_id: game_id
+
+		};
+		socket.to(requested_user).emit('game_start_response', success_data);
+		
+		log('game_start successful');
+	});
+
+	
 	
 
 });
