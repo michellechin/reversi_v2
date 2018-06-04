@@ -401,10 +401,5 @@ socket.on('game_update', function(payload){
 	old_board = board;
 });
 	
-	
-		alert(payload.message);
-		return;
-	
-	
-}
+
 		  
