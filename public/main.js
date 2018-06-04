@@ -332,7 +332,7 @@ var old_board = [
 socket.on('game_update', function(payload){
 	console.log('*** Client Log Message: \'game_update\'\n\tpayload: '+JSON.stringify(payload));
 	/* Check for a good board update */
-	if (payload.result == 'fail'){
+	if (payload.result === 'fail'){
 		console.log(payload.message);
 		
 		window.location.href = 'lobby.html?username='+username;
