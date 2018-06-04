@@ -40,6 +40,7 @@ console.log('The Server is running');
 /* A registry of socket_ids and player information */
 var players = [];
 
+
 var io = require('socket.io').listen(app);
 
 io.sockets.on('connection', function(socket){
@@ -123,6 +124,7 @@ io.sockets.on('connection', function(socket){
 		players[socket.id] = {};
 		players[socket.id].username = username;
 		players[socket.id].room = room;
+		//console.log(players[socket.id].room);
 		
 		/* Actually have the user join the room */
 		socket.join(room);
@@ -154,14 +156,14 @@ io.sockets.on('connection', function(socket){
 		
 		log('join_room success');
 		
-	    if(room !== 'lobby'){
-			send_game_update(socket,room,'initial update');
-			
+		if (room !== 'lobby') {
+				send_game_update(socket, room, 'initial update');
 		}
 		
 	});
 	
 	// Leave Room
+	// when a web page disconnects alert everyone
 	socket.on('disconnect', function(){
 		
 		log('client disconnected '+JSON.stringify(players[socket.id]));
@@ -184,6 +186,7 @@ io.sockets.on('connection', function(socket){
 	{
 	 
 	 	'room': room to join,
+	 	'username' : username of person sending the message,
 	 	'message' : the message to send
 	}
 	send_message_response: {
@@ -275,7 +278,7 @@ io.sockets.on('connection', function(socket){
 		'result': 'success',
 		'socket_id' : failure message
 	}
-	11:15 on video	
+	14:45 on video	
 	*/
 	
 	socket.on('invite', function(payload){
@@ -348,8 +351,9 @@ io.sockets.on('connection', function(socket){
 		log('invite successful');
 	});
 	
+
 	
-		/* uninvite command */
+	/* uninvite command */
 	/* payload: 
 	{
 	 
@@ -365,19 +369,19 @@ io.sockets.on('connection', function(socket){
 	}
 	uninvited: {
 		'result': 'success',
-		'socket_id' : the socket id of the person doing the uninviting
+		'socket_id' : the socket id of the person being uninvited
 	}
 	or {
 		'result': 'success',
 		'socket_id' : failure message
 	}
-	05:30 on video	
+	14:45 on video	
 	*/
 	
 	socket.on('uninvite', function(payload){
 		log('uninvite with ' + JSON.stringify(payload));
 		
-		/* Check to make sure that a payload was sent */
+		// Check to make sure that a payload was sent
 		if(('undefined' === typeof payload) || !payload){
 		   var error_message = 'uninvite had no payload, command aborted';
 			log(error_message);
@@ -388,7 +392,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}		
 		
-		/* Check that the message can be traced to a username */
+		// Check that the message can be traced to a username
 		var username = players[socket.id].username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'uninvite can\'t identify who sent the message.';
@@ -413,13 +417,11 @@ io.sockets.on('connection', function(socket){
 		
 		var room = players[socket.id].room;
 		var roomObject = io.sockets.adapter.rooms[room];
-		/* Make sure the user being invited is in the room */
 		
+		// Make sure the user being invited is in the room
 		if (!roomObject.sockets.hasOwnProperty(requested_user)) {
 			var error_message = 'invite requested a user that wasn\'t in the room, command aborted';
 			log(error_message);
-			
-			/*should the below say uninvite_response or invite_response? */
 			socket.emit('uninvite_response', {
 				result: 'fail',
 				message: error_message
@@ -427,7 +429,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 		
-		/* If everything is ok respond to the uninviter that it was successful */
+		// If everything is ok respond to the uninviter that it was successful
 		
 		var success_data = {
 			result: 'success',
@@ -436,7 +438,7 @@ io.sockets.on('connection', function(socket){
 		socket.emit('uninvite_response', success_data);
 
 		
-		/* Tell the uninvitee that they have been uninvited */
+		// Tell the uninvitee that they have been uninvited
 		
 		var success_data = {
 			result: 'success',
@@ -446,31 +448,30 @@ io.sockets.on('connection', function(socket){
 		
 		log('uninvite successful');
 	});
+	
 
 	
-			/* game_start command */
+	/* game_start command */
 	/* payload: 
 	{
 	 
 	 	'requested_user': the socket id of the person to play with
 	}
-	game_start_response: {
+	gamne_start_response: {
 		'result': 'success',
-		'socket_id' : the socket id of the person you are playing with
+		'socket_id' : the socket id of the person you are playing with,
 		'game_id' : id of the game session
-
 	}
 	or {
 		'result': 'fail',
 		'message' : failure message
 	}
-	08:50 on video	
 	*/
 	
 	socket.on('game_start', function(payload){
 		log('game_start with ' + JSON.stringify(payload));
 		
-		/* Check to make sure that a payload was sent */
+		// Check to make sure that a payload was sent
 		if(('undefined' === typeof payload) || !payload){
 		   var error_message = 'game_start had no payload, command aborted';
 			log(error_message);
@@ -481,7 +482,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}		
 		
-		/* Check that the message can be traced to a username */
+		// Check that the message can be traced to a username
 		var username = players[socket.id].username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'game_start can\'t identify who sent the message.';
@@ -507,9 +508,9 @@ io.sockets.on('connection', function(socket){
 		var room = players[socket.id].room;
 		var roomObject = io.sockets.adapter.rooms[room];
 		
-		/* Make sure the user being invited is in the room */
+		// Make sure the user being invited is in the room
 		if (!roomObject.sockets.hasOwnProperty(requested_user)) {
-			var error_message = 'game_start requested a user that wasn\'t in the room, command aborted';
+			var error_message = 'gamestart requested a user that wasn\'t in the room, command aborted';
 			log(error_message);
 			socket.emit('game_start_response', {
 				result: 'fail',
@@ -518,9 +519,11 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 		
-		/* If everything is ok respond to the game starter that it was successful */
-       /*var game_id = Math.floor((1+Math.random()) * 0x10000.toString(16).substring(1)); */
+		// If everything is ok respond to the game_starter that it was successful
+		
+		//var game_id = Math.floor((1+Math.random()) * 0x10000.toString(16).substring(1));
 		var game_id = Math.floor(1+Math.random() * 0x1000.toString(16).substring());
+		
 		var success_data = {
 			result: 'success',
 			socket_id: requested_user,
@@ -529,20 +532,18 @@ io.sockets.on('connection', function(socket){
 		socket.emit('game_start_response', success_data);
 
 		
-		/* Tell the other player to play */
+		// Tell the other player to play
 		
 		var success_data = {
 			result: 'success',
 			socket_id: socket.id,
 			game_id: game_id
-
 		};
 		socket.to(requested_user).emit('game_start_response', success_data);
 		
 		log('game_start successful');
 	});
 	
-
 	/* play_token command
 	// payload: 
 	{
@@ -564,7 +565,7 @@ io.sockets.on('connection', function(socket){
 	socket.on('play_token', function(payload){
 		log('play_token with ' + JSON.stringify(payload));
 		
-		/* Check to make sure that a payload was sent */
+		// Check to make sure that a payload was sent
 		if(('undefined' === typeof payload) || !payload){
 		   var error_message = 'play_token had no payload, command aborted';
 			log(error_message);
@@ -575,7 +576,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}		
 		
-		/* Check that the player has previously registered */
+		// Check that the player has previously registered
 		var player = players[socket.id];
 		if (('undefined' === typeof player) || !player) {
 			var error_message = 'server doesnt recognize you (try going back one screen).';
@@ -587,7 +588,6 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 		
-		/* Check that the message can be traced to a username */
 		var username = players[socket.id].username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'play token cant identify who sent the message.';
@@ -661,7 +661,7 @@ io.sockets.on('connection', function(socket){
 		
 		socket.emit('play_token_response',success_data);
 		
-		/* Execute the move */
+		// Execute the move
 		if (color === 'white') {
 			game.board[row][column] = 'w';
 			game.whose_turn = 'black';
@@ -677,14 +677,12 @@ io.sockets.on('connection', function(socket){
 		send_game_update(socket, game_id, 'played a token');
 		
 		
-	});
-	/* End of socket.on */
+	}); // End of socket.on
 	
 });
 
-
-/***************************************************/
-/*     Code related to the game state              */
+/***********************************/
+/* Code related to the game state */
 
 var games = [];
 
@@ -701,40 +699,32 @@ function create_new_game(){
 	new_game.last_move_time = d.getTime();
 	new_game.whose_turn = 'white';
 	new_game.board = [
-						['', '', '', '', '', '', '', ''],
-						['', '', '', '', '', '', '', ''],
-						['', '', '', '', '', '', '', ''],
-						['', '', '', 'w', 'b', '', '', ''],
-						['', '', '', 'b', 'w', '', '', ''],
-						['', '', '', '', '', '', '', ''],
-						['', '', '', '', '', '', '', ''],
-						['', '', '', '', '', '', '', '']
-		
-	                 ];
+		[' ',' ',' ',' ',' ',' ',' ',' ',],
+		[' ',' ',' ',' ',' ',' ',' ',' ',],
+		[' ',' ',' ',' ',' ',' ',' ',' ',],
+		[' ',' ',' ','w','b',' ',' ',' ',],
+		[' ',' ',' ','b','w',' ',' ',' ',],
+		[' ',' ',' ',' ',' ',' ',' ',' ',],
+		[' ',' ',' ',' ',' ',' ',' ',' ',],
+		[' ',' ',' ',' ',' ',' ',' ',' ',]
+	];
 	return new_game;
-
-
 }
 
 function send_game_update(socket, game_id, message){
-	
-	/* Check to see if a game with game_id already exists */
-	if(('undefined' === typeof games[game_id]) || !games[game_id]){
-		
-	/* No game exists, so make one */
-		console.log('No game exists. Creating '+game_id+' for '+socket.id);
-		games[game_id] = create_new_game();		
+	// Check to see if a game with game_id already exists
+	if (('undefined' === typeof games[game_id]) || !games[game_id]) {
+		// No game exists, so make one
+		console.log('No game exists. Creating ' + game_id+' for '+socket.id);
+		games[game_id] = create_new_game();
 	}
-
-	/* Make sure that only 2 people are in the game room */
-	/* Assign this socket a color */
-	/* Send game update */
+	
+	// Make sure that only 2 people are in the game room
 	var roomObject;
 	var numClients;
 	do {
 		roomObject = io.sockets.adapter.rooms[game_id];
 		numClients = roomObject.length;
-		
 		if (numClients > 2) {
 			console.log('Too many clients in room: '+game_id+' #: '+ numClients);
 			if (games[game_id].player_white.socket === roomObject.sockets[0]) {
@@ -745,7 +735,6 @@ function send_game_update(socket, game_id, message){
 				games[game_id].player_black.socket = '';
 				games[game_id].player_black.socket = '';
 			}
-			
 			// Kick one of the extra people out
 			var sacrifice = Object.keys(roomObject.sockets)[0];
 			io.of('/').connected[sacrifice].leave(game_id);
@@ -753,8 +742,8 @@ function send_game_update(socket, game_id, message){
 	}
 	while((numClients-1) > 2);
 	
-	/* Assign this socket a color */
-	/* If the curent player isn't assigned a color */
+	// Assign this socket a color
+	// If the curent player isn't assigned a color
 	if ((games[game_id].player_white.socket !== socket.id) && (games[game_id].player_black.socket !== socket.id)) {
 		console.log('Player isn\'t assigned a color: '+ socket.id);
 		// and there isn't a color to give them
@@ -767,14 +756,14 @@ function send_game_update(socket, game_id, message){
 	}
 	
 	// Assign colors to the players if not already done
-	if (games[game_id].player_white.socket === '') {  /* Don's tutorial only shows == */
+	if (games[game_id].player_white.socket === '') {
 		if (games[game_id].player_black.socket !== socket.id) {
 			games[game_id].player_white.socket = socket.id;
 			games[game_id].player_white.username = players[socket.id].username;
 		}
 	}
 	
-	if (games[game_id].player_black.socket === '') {  /* Don's tutorial only shows == */
+	if (games[game_id].player_black.socket === '') {
 		if (games[game_id].player_white.socket !== socket.id) {
 			games[game_id].player_black.socket = socket.id;
 			games[game_id].player_black.username = players[socket.id].username;
@@ -783,15 +772,15 @@ function send_game_update(socket, game_id, message){
 	
 	// Send game update
 	var success_data = {
-				result: 'success',
-				game: games[game_id],
-				message: message,
-				game_id: game_id
+		result: 'success',
+		game: games[game_id],
+		message: message,
+		game_id: game_id
 	};
 	
 	io.in(game_id).emit('game_update', success_data);
 	
-	/* Check to see if the game is over */
+	// Check to see if the game is over
 	var row, column;
 	var count = 0;
 	
@@ -804,8 +793,8 @@ function send_game_update(socket, game_id, message){
 	}
 	
 	
+	
 	if (count === 64) {
-		
 		// send a game over message
 		var success_data = {
 			result:'success',
@@ -814,12 +803,11 @@ function send_game_update(socket, game_id, message){
 			game_id: game_id
 		};
 		io.in(game_id).emit('game_over', success_data);
-		
 		// Delete old games after 1 hour
 		setTimeout(function(id){
 			return function(){
 				delete games[id];
-			} /*should I add semicolor? */  
+			}
 		}(game_id),60*60*1000);
 	}
 }

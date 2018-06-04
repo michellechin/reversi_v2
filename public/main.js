@@ -2,14 +2,13 @@
 
 /* This function returns the value associated with 'whichParam' on the URL */
 
-function getURLParameters(whichParam)
-{
+function getURLParameters(whichParam) {
 	var pageURL = window.location.search.substring(1);
 	var pageURLVariables = pageURL.split('&');
 	for(var i=0; i<pageURLVariables.length; i++){
-		var parameterName = pageURLVariables[i].split('=');
-		if (parameterName[0] == whichParam) {
-			return parameterName[1];
+		var paramaterName = pageURLVariables[i].split('=');
+		if (paramaterName[0] == whichParam) {
+			return paramaterName[1];
 		}
 	}
 }
@@ -44,9 +43,9 @@ socket.on('join_room_response', function(payload){ // Join room response
 	}
 	
 	/* If somone joined the new room then add a new row to the lobby table */
-	var dom_elements = $('.socket_'+payload.socket_id);
+	var dom_element = $('.socket_'+payload.socket_id);
 	/* If we don't already have an entry for this person */
-	if (dom_elements.length === 0) {
+	if (dom_element.length === 0) {
 		var nodeA = $('<div></div>');
 		nodeA.addClass('socket_'+payload.socket_id);
 		
@@ -61,7 +60,7 @@ socket.on('join_room_response', function(payload){ // Join room response
 		nodeB.addClass('col-9 text-right');
 		nodeB.append('<h4>'+payload.username+'</h4>');
 		
-		nodeC.addClass('col-3 text-left');
+		nodeC.addClass('cold-3 text-left');
 		var buttonC = makeInviteButton(payload.socket_id);
 		nodeC.append(buttonC);
 		
@@ -74,11 +73,11 @@ socket.on('join_room_response', function(payload){ // Join room response
 		nodeC.slideDown(1000);
 		
 	}
-	else {
+	else { // if we have seen the person who just joined (something weird happend)
 		uninvite(payload.socket_id);
 		var buttonC = makeInviteButton(payload.socket_id);
 		$('.socket_'+payload.socket_id+' button' ).replaceWith(buttonC);
-		dom_elements.slideDown(1000);
+		dom_element.slideDown(1000);
 	}
 	
 	/* Manage the message that a new player has joined */
@@ -95,8 +94,10 @@ socket.on('join_room_response', function(payload){ // Join room response
 // What to do when the server says someone has left a room
 
 socket.on('player_disconnected', function(payload){
+	console.log('*** Client Log Message: "disconnected" payload: '+JSON.stringify(payload));
 	
-	if (payload.result === 'fail'){
+	
+	if (payload.result === 'fail') {
 		alert(payload.message);
 		return;
 	}
@@ -131,12 +132,12 @@ socket.on('player_disconnected', function(payload){ // Leave room response
 	}
 	
 	// If we are being notified that we joined the room, then ignore it
-	if (payload.socket_id == socket.id) {
+	if (payload.socket_id === socket.id) {
 		return;
 	}
 	
 	// If somone left then animate out all of their content
-	var dom_elements = $('.socket_'+payload.socket_id);
+	var dom_element = $('.socket_'+payload.socket_id);
 	
 	// If something exists
 	if (dom_elements.length !== 0) {
@@ -153,16 +154,18 @@ socket.on('player_disconnected', function(payload){ // Leave room response
 });
 */
 
-function invite(who) { // Invite someone
+// Invite
+
+// Send an invite message to the server
+function invite(who) { // Inveite someone
 	var payload = {};
 	payload.requested_user = who;
-	
-	/* Do I need to change to \'invite\'payload: */
 	
 	console.log('*** Client Log Message: "invite" payload: '+JSON.stringify(payload));
 	socket.emit('invite', payload);
 }
 
+// Handle a response after sending an invite message to the server
 socket.on('invite_response', function(payload){ // invite_response
 	if (payload.result === 'fail'){
 		alert(payload.message);
@@ -172,7 +175,7 @@ socket.on('invite_response', function(payload){ // invite_response
 	$('.socket_'+payload.socket_id+' button').replaceWith(newNode);
 });
 
-/*Handle a notification that we have been invited */
+// Handle a notification that we have been invited
 socket.on('invited', function(payload){ // invited
 	if (payload.result === 'fail'){
 		alert(payload.message);
@@ -182,19 +185,31 @@ socket.on('invited', function(payload){ // invited
 	$('.socket_'+payload.socket_id+' button').replaceWith(newNode);
 });
 
-/* handles a notification that we have been uninvited*/
-function uninvite(who) { 
+
+// Uninvite
+
+// Send an uninvite message to the server
+function uninvite(who) { // unInveite someone
 	var payload = {};
 	payload.requested_user = who;
 	
-	/* Do I need to change to \'uninvite\'payload: */
-	
-	console.log('*** Client Log Message: \'uninvite\'payload: '+JSON.stringify(payload));
+	console.log('*** Client Log Message: "uninvite" payload: '+JSON.stringify(payload));
 	socket.emit('uninvite', payload);
 }
 
-socket.on('uninvite_response', function(payload){ // uninvite_response
-	if (payload.result == 'fail'){
+// Handle a response after sending an uninvite message to the server
+socket.on('uninvite_response', function(payload){ // unInvite_response
+	if (payload.result === 'fail'){
+		alert(payload.message);
+		return;
+	}
+	var newNode = makeInviteButton(payload.socket_id);
+	$('.socket_'+payload.socket_id+' button').replaceWith(newNode);
+});
+
+// Handle a notification that we have been uninvited
+socket.on('uninvited', function(payload){ // unInvited
+	if (payload.result === 'fail'){
 		alert(payload.message);
 		return;
 	}
@@ -203,52 +218,39 @@ socket.on('uninvite_response', function(payload){ // uninvite_response
 });
 
 
+// game_start
 
-socket.on('uninvited', function(payload){ // uninvited
-	if (payload.result == 'fail'){
-		alert(payload.message);
-		return;
-	}
-	var newNode = makeInviteButton(payload.socket_id);
-	$('.socket_'+payload.socket_id+' button').replaceWith(newNode);
-});
-
-
-/*send game start message to the server*/
-
-function game_start(who) { 
+// Send game_start message to the server
+function game_start(who) {
 	var payload = {};
 	payload.requested_user = who;
 	
-	console.log('*** Client Log Message: \'game_start\'payload: '+JSON.stringify(payload));
+	console.log('*** Client Log Message: "game_start" payload: '+JSON.stringify(payload));
 	socket.emit('game_start', payload);
 }
 
-
-socket.on('game_start_response', function(payload){ // handle notification that we have been engaged to play
-	if (payload.result == 'fail'){
+// Handle a notification that we have been engaged
+socket.on('game_start_response', function(payload){ // unInvited
+	if (payload.result === 'fail'){
 		alert(payload.message);
 		return;
 	}
-	
 	var newNode = makeEngagedButton(payload.socket_id);
 	$('.socket_'+payload.socket_id+' button').replaceWith(newNode);
 	
-	/*Jump to a new page */
-	window.location.href = 'game.html?username='+username+'&game_id='+payload.game_id;
+	/* Jump to a new page */
+	window.location.href = 'game.html?username=' + username + '&game_id='+payload.game_id;
 });
 
-
-function send_message(){ // setting up the message variable with content
+// setting up the message variable with content
+function send_message(){
 	var payload = {};
 	payload.room = chat_room;
 	payload.message = $('#send_message_holder').val();
 	console.log('*** Client Log Message: \'send_message\' payload: '+JSON.stringify(payload));
 	socket.emit('send_message', payload);
 	$('#send_message_holder').val('');
-
 }
-
 
 socket.on('send_message_response', function(payload){ // Send message response
 	if (payload.result == 'fail'){
@@ -261,7 +263,6 @@ socket.on('send_message_response', function(payload){ // Send message response
 	$('#messages').prepend(newNode);
 	newNode.slideDown(1000);
 });
-
 
 
 function makeInviteButton(socket_id) { // make an invite button
@@ -297,7 +298,7 @@ function makePlayButton(socket_id) { // make a play button
 
 }
 
-function makeEngagedButton() { // make an engage button
+function makeEngagedButton() { // make a engage button
 	
 	var newHTML = '<button type=\'button\' class=\'btn btn-danger\'>Engaged</button>';
 	var newNode = $(newHTML);
@@ -313,61 +314,57 @@ $(function(){
 	console.log('*** Client Log Message: \'join_room\ payload: ' + JSON.stringify(payload));
 	socket.emit('join_room', payload);
 	
-	/* commenting this out for now */
 	$('#quit').append('<a href="lobby.html?username='+username+'" class="btn btn-danger btn-default active" role="button" aria-pressed="true">Quit</a>');
-
 });
 
+// Code for the board specifically
+
 var old_board = [
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?'],
-	['?','?','?','?','?','?','?','?']
-	
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',],
+	['?','?','?','?','?','?','?','?',]
 ];
 
 var my_color = ' ';
 
 socket.on('game_update', function(payload){
 	console.log('*** Client Log Message: \'game_update\' \n\tpayload: '+JSON.stringify(payload));
-
-
-	/* Check for a good board update */
-	if (payload.result === 'fail'){
+	// Check for a good board update
+	if (payload.result === 'fail') {
 		console.log(payload.message);
 		window.location.href = 'lobby.html?username='+username;
 		return;
 	}
-	
-	/* Check for a good board in the payload */
+	// Check for a good board in payload
 	var board = payload.game.board;
-	if('undefined' === typeof board || !board){
+	if ('undefined' === typeof board || !board){
 		console.log('Internal error: received a malformed board update from the server');
-			return;
+		return;
 	}
-		
-	/* Update my color */
-		if (socket.id === payload.game.player_white.socket) {
+
+	// update my color
+	if (socket.id === payload.game.player_white.socket) {
 		my_color = 'white';
 	}
 	else if (socket.id === payload.game.player_black.socket) {
 		my_color = 'black';
 	}
 	else {
-		
-	/* something weird is going on, like three people playing at once */
-	/*send client back to the lobby */
+		// something weird is going on, like three people playing at once
+		// send client back to the lobby
 		window.location.href = 'lobby.html?username='+username;
 		return;
 	}
 	
 	$('#my_color').html('<h3 id="my_color">I am '+my_color+'</h3>');
-		
-	/* Animate changes to the board */
+	
+	// Animate changes to the board
+	
 	var blacksum = 0;
 	var whitesum = 0;
 	var row,column;
@@ -380,47 +377,32 @@ socket.on('game_update', function(payload){
 				whitesum++;
 			}
 			
-			/* If a board space has changed */
-			if(old_board[row][column] !== board [row][column]){
-				if(old_board[row][column] === '?' && board[row][column] === ''){
+			// if a board space has changed
+			if (old_board[row][column] !== board[row][column]){
+				if (old_board[row][column] === '?' && board[row][column] === ' ') {
 					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty.gif" alt="empty square"/>');
 				}
-					
-				    else if(old_board[row][column] === '?' && board[row][column] === 'w'){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_white.gif" alt="white square"/>');
-					}
-					
-					else if(old_board[row][column] === '?' && board[row][column] === 'b'){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_black.gif" alt="black square"/>');
-					}
-					
-					else if(old_board[row][column] === ' ' && board[row][column] === 'w'){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_white.gif" alt="white square"/>');
-					}
-					
-					else if(old_board[row][column] === ' ' && board[row][column] === 'b'){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_black.gif" alt="black square"/>');
-					}
-					
-					else if(old_board[row][column] === 'w' && board[row][column] === ' '){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/white_to_empty.gif" alt="empty square"/>');
-					}
-					
-					else if(old_board[row][column] === 'b' && board[row][column] === ' '){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/black_to_empty.gif" alt="empty square"/>');
-					}
-					
-					else if(old_board[row][column] === 'w' && board[row][column] === 'b'){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/white_to_black.gif" alt="black square"/>');
-					}
-					
-					else if(old_board[row][column] === 'b' && board[row][column] === 'w'){
-					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/black_to_white.gif" alt="white square"/>');
-					}
-					
-					else{
-						$("#"+row+'_'+column).html('<img src="assets/images/Tokens/error.gif" alt="error"/>');
-					}
+				else if (old_board[row][column] === '?' && board[row][column] === 'w') {
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_white.gif" alt="white square">');
+				}
+				else if (old_board[row][column] === '?' && board[row][column] === 'b'){
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_black.gif" alt="black square">');
+				}
+				else if (old_board[row][column] === ' ' && board[row][column] === 'w') {
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_white.gif" alt="empty square">');
+				}
+				else if (old_board[row][column] === ' ' && board[row][column] === 'b'){
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/empty_to_black.gif" alt="empty square">');
+				}
+				else if (old_board[row][column] === ' ' && board[row][column] === 'w') {
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/white_to_black.gif" alt="black square">');
+				}
+				else if (old_board[row][column] === ' ' && board[row][column] === 'b'){
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/black_to_white.gif" alt="white square">');
+				}
+				else {
+					$('#'+row+'_'+column).html('<img src="assets/images/Tokens/error.gif" alt="white square"> alt="error"/>');
+				}
 				
 				// Set up interactivity
 				$('#'+row+'_'+column).off('click');
@@ -451,8 +433,7 @@ socket.on('game_update', function(payload){
 
 socket.on('play_token_response', function(payload){
 	console.log('*** Client Log Message: \'play_token_response\'\n\tpayload: '+JSON.stringify(payload));
-	
-	/*Check for a good play_token_response */
+	// Check for a good play_token_response
 	if (payload.result === 'fail') {
 		console.log(payload.message);
 		alert(payload.message);
@@ -462,18 +443,23 @@ socket.on('play_token_response', function(payload){
 
 socket.on('game_over', function(payload){
 	console.log('*** Client Log Message: \'game_over\'\n\tpayload: '+JSON.stringify(payload));
-	
-	/*Check for a good play_token_response */
+	// Check for a good play_token_response
 	if (payload.result === 'fail') {
 		console.log(payload.message);
 		alert(payload.message);
 		return;
 	}
 	
-	/*Jump to a new page */
+	// Jump to a new page
 	$('#game_over').html('<h1>Game Over</h1><h2>'+payload.who_won+' won!</h2>');
 	$('#game_over').append('<br><a href="lobby.html?username='+username+'" class="btn btn-success btn-lg active" role="button" aria-pressed="true">Return to the lobby</a>');
 });
 
-	
-		  
+
+
+
+
+
+
+
+
