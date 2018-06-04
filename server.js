@@ -767,14 +767,14 @@ function send_game_update(socket, game_id, message){
 	}
 	
 	// Assign colors to the players if not already done
-	if (games[game_id].player_white.socket === '') {
+	if (games[game_id].player_white.socket === '') {  /* Don's tutorial only shows == */
 		if (games[game_id].player_black.socket !== socket.id) {
 			games[game_id].player_white.socket = socket.id;
 			games[game_id].player_white.username = players[socket.id].username;
 		}
 	}
 	
-	if (games[game_id].player_black.socket === '') {
+	if (games[game_id].player_black.socket === '') {  /* Don's tutorial only shows == */
 		if (games[game_id].player_white.socket !== socket.id) {
 			games[game_id].player_black.socket = socket.id;
 			games[game_id].player_black.username = players[socket.id].username;
@@ -791,7 +791,7 @@ function send_game_update(socket, game_id, message){
 	
 	io.in(game_id).emit('game_update', success_data);
 	
-	// Check to see if the game is over
+	/* Check to see if the game is over */
 	var row, column;
 	var count = 0;
 	
@@ -804,7 +804,6 @@ function send_game_update(socket, game_id, message){
 	}
 	
 	
-	
 	if (count === 64) {
 		
 		// send a game over message
@@ -815,11 +814,12 @@ function send_game_update(socket, game_id, message){
 			game_id: game_id
 		};
 		io.in(game_id).emit('game_over', success_data);
+		
 		// Delete old games after 1 hour
 		setTimeout(function(id){
 			return function(){
 				delete games[id];
-			} /*should I add semicolor? */
+			} /*should I add semicolor? */  
 		}(game_id),60*60*1000);
 	}
 }

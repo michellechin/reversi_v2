@@ -82,10 +82,10 @@ socket.on('join_room_response', function(payload){ // Join room response
 	}
 	
 	/* Manage the message that a new player has joined */
-	var newHTML = '<p>'+payload.username+' just entered the lobby</p>';
+	var newHTML = '<p>'+payload.username+' just entered the room</p>';
 	var newNode = $(newHTML);
 	newNode.hide();
-	$('#messages').append(newNode);
+	$('#messages').prepend(newNode);
 	newNode.slideDown(1000);
 		
 
@@ -115,7 +115,7 @@ socket.on('player_disconnected', function(payload){
 	}
 	
 	// manage the message that a player has left
-	var newHTML = '<p>'+payload.username+' has left the lobby</p>';
+	var newHTML = '<p>'+payload.username+' has left the room</p>';
 	var newNode = $(newHTML);
 	newNode.hide();
 	$('#messages').prepend(newNode);
@@ -245,6 +245,7 @@ function send_message(){ // setting up the message variable with content
 	payload.message = $('#send_message_holder').val();
 	console.log('*** Client Log Message: \'send_message\' payload: '+JSON.stringify(payload));
 	socket.emit('send_message', payload);
+	$('#send_message_holder').val('');
 
 }
 
@@ -257,7 +258,7 @@ socket.on('send_message_response', function(payload){ // Send message response
 	var newHTML = '<p><b>'+payload.username+' says:</b> '+payload.message+'</p>';
 	var newNode = $(newHTML);
 	newNode.hide();
-	$('#messages').append(newNode);
+	$('#messages').prepend(newNode);
 	newNode.slideDown(1000);
 });
 
