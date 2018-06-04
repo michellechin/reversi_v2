@@ -20,3 +20,12 @@ table#game_board td{
 #messages p{
 	margin:0px;
 }
+/*
+.hovered_over:hover {
+    background-image: url("../images/hover.gif"); background-color: yellow; background-size: 100% 100%;
+}
+*/
+
+.hovered_over:hover {
+    background-image: url("../images/Tokens/hover.gif"); background-size: 100% 100%; background-color: transparent;
+}
