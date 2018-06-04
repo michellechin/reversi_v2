@@ -564,7 +564,7 @@ io.sockets.on('connection', function(socket){
 	socket.on('play_token', function(payload){
 		log('play_token with ' + JSON.stringify(payload));
 		
-		// Check to make sure that a payload was sent
+		/* Check to make sure that a payload was sent */
 		if(('undefined' === typeof payload) || !payload){
 		   var error_message = 'play_token had no payload, command aborted';
 			log(error_message);
@@ -575,7 +575,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}		
 		
-		// Check that the player has previously registered
+		/* Check that the player has previously registered */
 		var player = players[socket.id];
 		if (('undefined' === typeof player) || !player) {
 			var error_message = 'server doesnt recognize you (try going back one screen).';
@@ -587,6 +587,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 		
+		/* Check that the message can be traced to a username */
 		var username = players[socket.id].username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'play token cant identify who sent the message.';
@@ -660,7 +661,7 @@ io.sockets.on('connection', function(socket){
 		
 		socket.emit('play_token_response',success_data);
 		
-		// Execute the move
+		/* Execute the move */
 		if (color === 'white') {
 			game.board[row][column] = 'w';
 			game.whose_turn = 'black';
@@ -676,7 +677,8 @@ io.sockets.on('connection', function(socket){
 		send_game_update(socket, game_id, 'played a token');
 		
 		
-	}); // End of socket.on
+	});
+	/* End of socket.on */
 	
 });
 
@@ -715,9 +717,11 @@ function create_new_game(){
 }
 
 function send_game_update(socket, game_id, message){
+	
 	/* Check to see if a game with game_id already exists */
 	if(('undefined' === typeof games[game_id]) || !games[game_id]){
-		/* No game exists, so make one */
+		
+	/* No game exists, so make one */
 		console.log('No game exists. Creating '+game_id+' for '+socket.id);
 		games[game_id] = create_new_game();		
 	}
@@ -730,6 +734,7 @@ function send_game_update(socket, game_id, message){
 	do {
 		roomObject = io.sockets.adapter.rooms[game_id];
 		numClients = roomObject.length;
+		
 		if (numClients > 2) {
 			console.log('Too many clients in room: '+game_id+' #: '+ numClients);
 			if (games[game_id].player_white.socket === roomObject.sockets[0]) {
@@ -740,6 +745,7 @@ function send_game_update(socket, game_id, message){
 				games[game_id].player_black.socket = '';
 				games[game_id].player_black.socket = '';
 			}
+			
 			// Kick one of the extra people out
 			var sacrifice = Object.keys(roomObject.sockets)[0];
 			io.of('/').connected[sacrifice].leave(game_id);
@@ -747,8 +753,8 @@ function send_game_update(socket, game_id, message){
 	}
 	while((numClients-1) > 2);
 	
-	// Assign this socket a color
-	// If the curent player isn't assigned a color
+	/* Assign this socket a color */
+	/* If the curent player isn't assigned a color */
 	if ((games[game_id].player_white.socket !== socket.id) && (games[game_id].player_black.socket !== socket.id)) {
 		console.log('Player isn\'t assigned a color: '+ socket.id);
 		// and there isn't a color to give them
@@ -777,10 +783,10 @@ function send_game_update(socket, game_id, message){
 	
 	// Send game update
 	var success_data = {
-		result: 'success',
-		game: games[game_id],
-		message: message,
-		game_id: game_id
+				result: 'success',
+				game: games[game_id],
+				message: message,
+				game_id: game_id
 	};
 	
 	io.in(game_id).emit('game_update', success_data);
@@ -800,6 +806,7 @@ function send_game_update(socket, game_id, message){
 	
 	
 	if (count === 64) {
+		
 		// send a game over message
 		var success_data = {
 			result:'success',
@@ -812,7 +819,7 @@ function send_game_update(socket, game_id, message){
 		setTimeout(function(id){
 			return function(){
 				delete games[id];
-			}; /*should I remove this semicolor? */
+			} /*should I add semicolor? */
 		}(game_id),60*60*1000);
 	}
 }
