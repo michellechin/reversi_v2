@@ -549,7 +549,7 @@ io.sockets.on('connection', function(socket){
 /***************************************************/
 /*     Code related to the game state              */
 
-var game = [];
+var games = [];
 
 function create_new_game(){
 	var new_game = {};
