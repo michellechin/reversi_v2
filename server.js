@@ -1,12 +1,12 @@
 /*********************************************/
-/*      Set up the static file server        */
-/* Include the static file webserver library */
+//      Set up the static file server
+// Include the static file webserver library
 var static = require('node-static');
 
-/* Include the http server library */
+// Include the http server library
 var http = require('http');
 
-/* Assume that we are running on Heroku */
+// Assume that we are running on Heroku
 var port = process.env.PORT;
 var directory = __dirname + '/public';
 
@@ -18,10 +18,10 @@ if (typeof port == 'undefined' || !port){
 	port = 8080;
 }
 
-/* Set up a static web-server that will deliver files from the filesystem */
+// Set up a static web-server that will deliver files from the filesystem
 var file = new static.Server(directory);
 
-/* Construct an http server that get files from the file server */
+// Construct an http server that get files from the file server
 var app = http.createServer(
 	function(request,response) {
 		request.addListener('end',
@@ -37,7 +37,7 @@ console.log('The Server is running');
 /**********************************************/
 /*      Set up the web socket file server     */
 
-/* A registry of socket_ids and player information */
+// A registry of socket_ids and player information
 var players = [];
 
 
@@ -85,7 +85,7 @@ io.sockets.on('connection', function(socket){
 	socket.on('join_room', function(payload){
 		log('\'join_room\' command'+JSON.stringify(payload));
 
-		/* Check that the client sent a payload */
+		// Check that the client sent a payload
 		if(('undefined' === typeof payload) || !payload){
 		   var error_message = 'join_room had no payload, command aborted';
 			log(error_message);
@@ -96,7 +96,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 
-		/* check that the payload has a room to join */
+		// check that the payload has a room to join
 		var room = payload.room;
 		if (('undefined' === typeof room) || !room) {
 			var error_message = 'join_room didn\'t specify a room, command aborted';
@@ -108,7 +108,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 
-		/* check that a username has been provided */
+		// check that a username has been provided
 		var username = payload.username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'join_room didn\'t specify a username, command aborted';
@@ -120,19 +120,19 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 
-		/* Store information about this new player */
+		// Store information about this new player
 		players[socket.id] = {};
 		players[socket.id].username = username;
 		players[socket.id].room = room;
 		//console.log(players[socket.id].room);
 
-		/* Actually have the user join the room */
+		// Actually have the user join the room
 		socket.join(room);
 
-		/* Get the room object */
+		// Get the room object
 		var roomObject = io.sockets.adapter.rooms[room];
 
-		/* Tell everyone that is in the room that someone just joined */
+		// Tell everyone that is in the room that someone just joined
 		var numClients = roomObject.length;
 		var success_data = {
 									result: 'success',
@@ -284,7 +284,7 @@ io.sockets.on('connection', function(socket){
 	socket.on('invite', function(payload){
 		log('invite with ' + JSON.stringify(payload));
 
-		/* Check to make sure that a payload was sent */
+		// Check to make sure that a payload was sent */
 		if(('undefined' === typeof payload) || !payload){
 		   var error_message = 'invite had no payload, command aborted';
 			log(error_message);
@@ -295,7 +295,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 
-		/* Check that the message can be traced to a username */
+		// Check that the message can be traced to a username */
 		var username = players[socket.id].username;
 		if (('undefined' === typeof username) || !username) {
 			var error_message = 'invite can\'t identify who sent the message.';
@@ -320,7 +320,7 @@ io.sockets.on('connection', function(socket){
 
 		var room = players[socket.id].room;
 		var roomObject = io.sockets.adapter.rooms[room];
-		/* Make sure the user being invited is in the room */
+		// Make sure the user being invited is in the room
 		if (!roomObject.sockets.hasOwnProperty(requested_user)) {
 			var error_message = 'invite requested a user that wasn\'t in the room, command aborted';
 			log(error_message);
@@ -331,7 +331,7 @@ io.sockets.on('connection', function(socket){
 			return;
 		}
 
-		/* If everything is ok respond to the inviter that it was successful */
+		// If everything is ok respond to the inviter that it was successful
 
 		var success_data = {
 			result: 'success',
@@ -340,7 +340,7 @@ io.sockets.on('connection', function(socket){
 		socket.emit('invite_response', success_data);
 
 
-		/* Tell the invitee that they have been invited */
+		// Tell the invitee that they have been invited
 
 		var success_data = {
 			result: 'success',
@@ -761,7 +761,7 @@ function check_line_match(who,dr,dc,r,c,board){
 }
 
 
-/* Check if the position at r,c contains the opposite of who on the board and if the line indicated by adding dr to r dc to c eventually ends in the who color */
+// Check if the position at r,c contains the opposite of who on the board and if the line indicated by adding dr to r dc to c eventually ends in the who color
 function valid_move(who,dr,dc,r,c,board){
 	var other;
 	if(who === 'b'){
@@ -771,7 +771,7 @@ function valid_move(who,dr,dc,r,c,board){
 		other = 'b';
 	}
 	else{
-		log('Houston we have a color problem: '+who);
+		log('Whitney Houston we have a color problem: '+who);
 		return false;
 	}
 	if((r+dr < 0) || (r+dr > 7)){
